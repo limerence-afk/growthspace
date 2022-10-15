@@ -24,14 +24,7 @@ namespace EndavaGrowthSpace.DAL.Repositories
         {
             return _entities.Where(predicate);
         }
-
-        public void Update(Module module, int id)
-        {
-            var index = _entities.FindIndex(e => e.Id == id);
-            if (index == -1) throw new Exception();
-            _entities[index] = module;
-        }
-
+        
         public void Delete(int id)
         {
             var index = _entities.FindIndex(e => e.Id == id);

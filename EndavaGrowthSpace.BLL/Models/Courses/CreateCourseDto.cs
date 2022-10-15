@@ -9,5 +9,4 @@ public class CreateCourseDto
     public Discipline Discipline { get; set; }
     public string? Description { get; set; }
     public Difficulty Difficulty { get; set; }
-    public List<Module>? Modules { get; set; }
 }

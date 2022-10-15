@@ -2,6 +2,18 @@
 {
     public class BaseEntity
     {
+        public BaseEntity()
+        {
+            CreatedAt = DateTimeOffset.UtcNow;
+            UpdatedAt = CreatedAt;
+        }
         public int Id { get; set; }
+        public DateTimeOffset CreatedAt { get; protected set; }
+        public DateTimeOffset UpdatedAt { get; protected set; }
+
+        public void NotifyUpdated()
+        {
+            UpdatedAt = DateTimeOffset.UtcNow;
+        }
     }
 }

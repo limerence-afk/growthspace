@@ -8,5 +8,5 @@ public interface IModuleService
     Module Add(CreateModuleDto createModuleDto, int userId);
     Module GetById(int id);
     void Delete(int id);
-    void Put(UpdateModuleDto updateModuleDto, int id, int userId);
+    void Update(UpdateModuleDto updateModuleDto, int id, int userId);
 }
