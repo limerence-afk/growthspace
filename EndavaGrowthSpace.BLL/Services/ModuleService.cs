@@ -31,7 +31,13 @@ public class ModuleService : IModuleService
 
     public Module GetById(int id)
     {
-        return _moduleRepository.GetById(id);
+        var module = _moduleRepository.GetById(id);
+        if (module is null)
+        {
+            throw new Exception();
+        }
+
+        return module;
     }
 
     public void Delete(int id)
