@@ -59,7 +59,9 @@ public class ModuleService : IModuleService
             throw new Exception();
         }
 
-        if (course.Enrollments.All(u => u.Id != userId))
+        if (course.CreatedBy?.Id == userId ||
+            course.Enrollments.All(u => u.Id != userId) ||
+            course.Contributors.All(u => u.Id != userId))
         {
             throw new Exception();
         }

@@ -10,7 +10,6 @@ public class CourseService : ICourseService
     private readonly ICourseRepository _courseRepository;
     private readonly IAuthenticationProvider _authenticationProvider;
 
-
     public CourseService(ICourseRepository courseRepository, IAuthenticationProvider authenticationProvider
     )
     {
@@ -33,19 +32,26 @@ public class CourseService : ICourseService
         return _courseRepository.Add(course);
     }
 
-
     public GetCourseDto GetById(int id)
     {
+        var userId = _authenticationProvider.GetUserId();
         var course = _courseRepository.GetById(id);
         if (course is null)
         {
             throw new Exception();
         }
 
-        return CourseToDTO(course);
+        if (course.CreatedBy?.Id == userId ||
+            course.Enrollments.All(u => u.Id != userId) ||
+            course.Contributors.All(u => u.Id != userId))
+        {
+            throw new Exception();
+        }
+
+        return CourseToDto(course);
     }
 
-    private static GetCourseDto CourseToDTO(Course course)
+    private static GetCourseDto CourseToDto(Course course)
     {
         return new GetCourseDto()
         {
@@ -77,7 +83,7 @@ public class CourseService : ICourseService
 
         _courseRepository.Delete(id);
     }
-
+  
     public void EnrollUser(int courseId)
     {
         var userId = _authenticationProvider.GetUserId();
@@ -119,8 +125,8 @@ public class CourseService : ICourseService
         {
             course.Discipline = updateCourseDto.Discipline.Value;
         }
-        
+
         course.NotifyUpdated();
-        return CourseToDTO(course);
+        return CourseToDto(course);
     }
 }
