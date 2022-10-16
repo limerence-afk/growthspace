@@ -5,9 +5,9 @@ namespace EndavaGrowthSpace.BLL.Interfaces;
 
 public interface ICourseService
 {
-    Course Add(CreateCourseDto createCourseDto, int userId);
-    Course GetById(int id);
+    Course Add(CreateCourseDto createCourseDto);
+    GetCourseDto GetById(int id);
     void Delete(int id);
-    void Update(UpdateCourseDto updateCourseDto, int id, int userId);
-    void EnrollUser(int courseId, int userId);
+    void Update(UpdateCourseDto updateCourseDto, int id);
+    void EnrollUser(int courseId);
 }

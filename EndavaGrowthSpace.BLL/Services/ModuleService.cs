@@ -9,15 +9,18 @@ public class ModuleService : IModuleService
 {
     private readonly IModuleRepository _moduleRepository;
     private readonly ICourseRepository _courseRepository;
+    private readonly IAuthenticationProvider _authenticationProvider;
 
-    public ModuleService(IModuleRepository moduleRepository, ICourseRepository courseRepository)
+    public ModuleService(IModuleRepository moduleRepository, ICourseRepository courseRepository, IAuthenticationProvider authenticationProvider)
     {
         _moduleRepository = moduleRepository;
         _courseRepository = courseRepository;
+        _authenticationProvider = authenticationProvider;
     }
 
-    public Module Add(CreateModuleDto createModuleDto, int userId)
+    public Module Add(CreateModuleDto createModuleDto)
     {
+        var userId = _authenticationProvider.GetUserId();
         var module = new Module()
         {
             Title = createModuleDto.Title,
@@ -42,22 +45,38 @@ public class ModuleService : IModuleService
 
     public Module GetById(int id)
     {
+        var userId = _authenticationProvider.GetUserId();
         var module = _moduleRepository.GetById(id);
         if (module is null)
         {
             throw new Exception();
         }
-
+        var course = _courseRepository.GetById(module.CourseId);
+        if (course is null)
+        {
+            throw new Exception();
+        }
+        if (course.Enrollments.All(u => u.Id != userId))
+        {
+            throw new Exception();
+        }
         return module;
     }
 
     public void Delete(int id)
     {
+        var userId = _authenticationProvider.GetUserId();
         var module = _moduleRepository.GetById(id);
         if (module is null)
         {
             throw new Exception();
         }
+
+        if (module.CreatedBy?.Id != userId)
+        {
+            throw new Exception();
+        }
+
 
         var course = _courseRepository.GetById(module.CourseId);
         if (course is null)
@@ -69,15 +88,16 @@ public class ModuleService : IModuleService
         _moduleRepository.Delete(id);
     }
 
-    public void Update(UpdateModuleDto updateModuleDto, int id, int userId)
+    public void Update(UpdateModuleDto updateModuleDto, int id)
     {
+        var userId = _authenticationProvider.GetUserId();
         var module = _moduleRepository.GetById(id);
         if (module is null)
         {
             throw new Exception();
         }
 
-        if (userId != module.CreatedBy?.Id) return;
+        if (userId != module.CreatedBy?.Id) throw new Exception();
         if (updateModuleDto.Title is not null)
         {
             module.Title = updateModuleDto.Title;

@@ -8,15 +8,19 @@ namespace EndavaGrowthSpace.BLL.Services;
 public class CourseService : ICourseService
 {
     private readonly ICourseRepository _courseRepository;
-    
+    private readonly IAuthenticationProvider _authenticationProvider;
 
-    public CourseService(ICourseRepository courseRepository)
+
+    public CourseService(ICourseRepository courseRepository, IAuthenticationProvider authenticationProvider
+    )
     {
         _courseRepository = courseRepository;
+        _authenticationProvider = authenticationProvider;
     }
 
-    public Course Add(CreateCourseDto createCourseDto, int userId)
+    public Course Add(CreateCourseDto createCourseDto)
     {
+        var userId = _authenticationProvider.GetUserId();
         var course = new Course()
         {
             Title = createCourseDto.Title,
@@ -30,7 +34,7 @@ public class CourseService : ICourseService
     }
 
 
-    public Course GetById(int id)
+    public GetCourseDto GetById(int id)
     {
         var course = _courseRepository.GetById(id);
         if (course is null)
@@ -38,16 +42,29 @@ public class CourseService : ICourseService
             throw new Exception();
         }
 
-        return course;
+        return new GetCourseDto() {Modules = course.Modules.Select(m => new GetModuleDto() {Title = m.Title})};
     }
 
     public void Delete(int id)
     {
+        var userId = _authenticationProvider.GetUserId();
+        var course = _courseRepository.GetById(id);
+        if (course is null)
+        {
+            throw new Exception();
+        }
+
+        if (course.CreatedBy?.Id != userId)
+        {
+            throw new Exception();
+        }
+
         _courseRepository.Delete(id);
     }
 
-    public void EnrollUser(int courseId, int userId)
+    public void EnrollUser(int courseId)
     {
+        var userId = _authenticationProvider.GetUserId();
         var course = _courseRepository.GetById(courseId);
         if (course is null)
         {
@@ -57,15 +74,16 @@ public class CourseService : ICourseService
         course.Enrollments.Add(new User() {Id = userId});
     }
 
-    public void Update(UpdateCourseDto updateCourseDto, int id, int userId)
+    public void Update(UpdateCourseDto updateCourseDto, int id)
     {
+        var userId = _authenticationProvider.GetUserId();
         var course = _courseRepository.GetById(id);
         if (course is null)
         {
             throw new Exception();
         }
 
-        if (userId != course.CreatedBy?.Id) return;
+        if (userId != course.CreatedBy?.Id) throw new Exception();
         if (updateCourseDto.Title is not null)
         {
             course.Title = updateCourseDto.Title;
