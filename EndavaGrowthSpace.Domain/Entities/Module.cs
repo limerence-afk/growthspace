@@ -8,5 +8,6 @@
         public string? Content { get; set; }
         public int Order { get; set; }
         public int CourseId { get; set; }
+        public Course Course { get; set; }
     }
 }

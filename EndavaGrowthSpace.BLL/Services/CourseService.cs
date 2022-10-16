@@ -42,7 +42,23 @@ public class CourseService : ICourseService
             throw new Exception();
         }
 
-        return new GetCourseDto() {Modules = course.Modules.Select(m => new GetModuleDto() {Title = m.Title})};
+        return CourseToDTO(course);
+    }
+
+    private static GetCourseDto CourseToDTO(Course course)
+    {
+        return new GetCourseDto()
+        {
+            Id = course.Id,
+            Title = course.Title,
+            CreatedBy = course.CreatedBy,
+            Discipline = course.Discipline,
+            Description = course.Description,
+            Difficulty = course.Difficulty,
+            CreatedAt = course.CreatedAt,
+            UpdatedAt = course.UpdatedAt,
+            Modules = course.Modules.Select(m => new GetModuleDto() {Title = m.Title})
+        };
     }
 
     public void Delete(int id)
@@ -74,7 +90,7 @@ public class CourseService : ICourseService
         course.Enrollments.Add(new User() {Id = userId});
     }
 
-    public void Update(UpdateCourseDto updateCourseDto, int id)
+    public GetCourseDto Update(UpdateCourseDto updateCourseDto, int id)
     {
         var userId = _authenticationProvider.GetUserId();
         var course = _courseRepository.GetById(id);
@@ -103,7 +119,8 @@ public class CourseService : ICourseService
         {
             course.Discipline = updateCourseDto.Discipline.Value;
         }
-
+        
         course.NotifyUpdated();
+        return CourseToDTO(course);
     }
 }

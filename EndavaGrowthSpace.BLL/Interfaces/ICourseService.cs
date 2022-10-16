@@ -8,6 +8,6 @@ public interface ICourseService
     Course Add(CreateCourseDto createCourseDto);
     GetCourseDto GetById(int id);
     void Delete(int id);
-    void Update(UpdateCourseDto updateCourseDto, int id);
+    GetCourseDto Update(UpdateCourseDto updateCourseDto, int id);
     void EnrollUser(int courseId);
 }

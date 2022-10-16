@@ -11,7 +11,8 @@ public class ModuleService : IModuleService
     private readonly ICourseRepository _courseRepository;
     private readonly IAuthenticationProvider _authenticationProvider;
 
-    public ModuleService(IModuleRepository moduleRepository, ICourseRepository courseRepository, IAuthenticationProvider authenticationProvider)
+    public ModuleService(IModuleRepository moduleRepository, ICourseRepository courseRepository,
+        IAuthenticationProvider authenticationProvider)
     {
         _moduleRepository = moduleRepository;
         _courseRepository = courseRepository;
@@ -21,6 +22,12 @@ public class ModuleService : IModuleService
     public Module Add(CreateModuleDto createModuleDto)
     {
         var userId = _authenticationProvider.GetUserId();
+        var course = _courseRepository.GetById(createModuleDto.CourseId);
+        if (course is null)
+        {
+            throw new Exception();
+        }
+
         var module = new Module()
         {
             Title = createModuleDto.Title,
@@ -28,17 +35,11 @@ public class ModuleService : IModuleService
             Description = createModuleDto.Description,
             Content = createModuleDto.Content,
             Order = createModuleDto.Order,
-            CourseId = createModuleDto.CourseId
+            CourseId = createModuleDto.CourseId,
+            Course = course
         };
 
-        var course = _courseRepository.GetById(createModuleDto.CourseId);
-        if (course is null)
-        {
-            throw new Exception();
-        }
-
         course.Modules.Add(module);
-
 
         return _moduleRepository.Add(module);
     }
@@ -51,15 +52,18 @@ public class ModuleService : IModuleService
         {
             throw new Exception();
         }
-        var course = _courseRepository.GetById(module.CourseId);
+
+        var course = module.Course;
         if (course is null)
         {
             throw new Exception();
         }
+
         if (course.Enrollments.All(u => u.Id != userId))
         {
             throw new Exception();
         }
+
         return module;
     }
 
@@ -77,8 +81,7 @@ public class ModuleService : IModuleService
             throw new Exception();
         }
 
-
-        var course = _courseRepository.GetById(module.CourseId);
+        var course = module.Course;
         if (course is null)
         {
             throw new Exception();
@@ -88,7 +91,7 @@ public class ModuleService : IModuleService
         _moduleRepository.Delete(id);
     }
 
-    public void Update(UpdateModuleDto updateModuleDto, int id)
+    public Module Update(UpdateModuleDto updateModuleDto, int id)
     {
         var userId = _authenticationProvider.GetUserId();
         var module = _moduleRepository.GetById(id);
@@ -114,5 +117,6 @@ public class ModuleService : IModuleService
         }
 
         module.NotifyUpdated();
+        return module;
     }
 }

@@ -8,7 +8,7 @@
             UpdatedAt = CreatedAt;
         }
         public int Id { get; set; }
-        public DateTimeOffset CreatedAt { get; protected set; }
+        public DateTimeOffset CreatedAt { get; }
         public DateTimeOffset UpdatedAt { get; protected set; }
 
         public void NotifyUpdated()
